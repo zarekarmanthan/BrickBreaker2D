@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PaddleController : MonoBehaviour
+public class PaddleHandler : MonoBehaviour
 {
     public Slider slider; // Assign the slider in the Inspector
     public float boundary = 2.5f; // Horizontal boundary for the paddle

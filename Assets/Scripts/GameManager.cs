@@ -4,14 +4,25 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject ballPrefab;
-    public GameObject paddle;
-    public TextMeshProUGUI scoreText;
-
+    [SerializeField] GameObject ballPrefab;
+    [SerializeField] GameObject paddle;
+  
+    [Space]
+    [SerializeField] TextMeshProUGUI scoreText;
+    
+    [Space]
+    [SerializeField] Button startBtn;
     private int score;
+
+    private void Awake()
+    {
+        Time.timeScale = 0;
+        
+    }
 
     void Start()
     {
+        startBtn.onClick.AddListener(OnClickStart);
         ResetBall();
     }
 
@@ -25,4 +36,11 @@ public class GameManager : MonoBehaviour
         score += points;
         scoreText.text = "Score: " + score;
     }
+
+    public void OnClickStart()
+    {
+        startBtn.gameObject.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
 }

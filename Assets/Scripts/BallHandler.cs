@@ -1,14 +1,27 @@
 using UnityEngine;
 
-public class BallController : MonoBehaviour
+public class BallHandler : MonoBehaviour
 {
-    public Vector2 initialDirection = Vector2.up + Vector2.right; // Diagonal movement
+    public Vector2 offset = new Vector2(0, 0.5f); // Offset from the top of the paddle
+    public Vector2 initialDirection = Vector2.up + Vector2.right; // Initial direction
     public float speed = 5f;
 
     private Vector2 direction;
 
+    private float leftBoundary;
+    private float rightBoundary;
+    private float topBoundary;
+    private float bottomBoundary;
+
+
     void Start()
     {
+        CalculateScreenBoundaries();
+
+        // Start the ball at the top of the paddle with the specified offset
+        Vector2 paddlePosition = new Vector2(0,-3.5f);
+        transform.position = new Vector3(paddlePosition.x + offset.x, paddlePosition.y + offset.y, 0);
+
         direction = initialDirection.normalized; // Normalize direction
     }
 
@@ -22,19 +35,20 @@ public class BallController : MonoBehaviour
     {
         transform.Translate(direction * speed * Time.deltaTime);
 
+
         // Screen boundaries
-        if (transform.position.x > 2.5f || transform.position.x < -2.5f) // Left/Right walls
+        if (transform.position.x > rightBoundary || transform.position.x < leftBoundary) // Left/Right walls
         {
             direction.x = -direction.x; // Reflect X direction
         }
-        if (transform.position.y > 5f) // Top wall
+        if (transform.position.y > topBoundary) // Top wall
         {
             direction.y = -direction.y; // Reflect Y direction
         }
-        if (transform.position.y < -5f) // Bottom wall
+        if (transform.position.y < bottomBoundary) // Bottom wall
         {
             // Handle game over logic
-            FindObjectOfType<GameManager>().scoreText.text = "GameOver" ;
+           // FindObjectOfType<GameManager>().scoreText.text = "GameOver" ;
 
 
         }
@@ -91,6 +105,25 @@ public class BallController : MonoBehaviour
         Destroy(brick);
 
         // Update the score
-        FindObjectOfType<GameManager>().AddScore(10);
+      //  FindObjectOfType<GameManager>().AddScore(10);
+    }
+
+
+    void CalculateScreenBoundaries()
+    {
+        float offset = 0.2f;
+
+        // Get screen boundaries in world coordinates
+        Camera mainCamera = Camera.main;
+        Vector3 bottomLeft = mainCamera.ViewportToWorldPoint(new Vector3(0, 0, mainCamera.nearClipPlane));
+        Vector3 topRight = mainCamera.ViewportToWorldPoint(new Vector3(1, 1, mainCamera.nearClipPlane));
+
+        // Set boundaries
+        leftBoundary = bottomLeft.x + offset;
+        rightBoundary = topRight.x - offset;
+        bottomBoundary = bottomLeft.y + offset;
+        topBoundary = topRight.y - offset;
+
+        Debug.Log($"Boundaries: Left {leftBoundary}, Right {rightBoundary}, Bottom {bottomBoundary}, Top {topBoundary}");
     }
 }
