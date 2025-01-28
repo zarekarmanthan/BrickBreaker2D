@@ -18,10 +18,6 @@ public class BallHandler : MonoBehaviour
     {
         CalculateScreenBoundaries();
 
-        // Start the ball at the top of the paddle with the specified offset
-        Vector2 paddlePosition = new Vector2(0,-3.5f);
-        transform.position = new Vector3(paddlePosition.x + offset.x, paddlePosition.y + offset.y, 0);
-
         direction = initialDirection.normalized; // Normalize direction
     }
 
@@ -47,10 +43,7 @@ public class BallHandler : MonoBehaviour
         }
         if (transform.position.y < bottomBoundary) // Bottom wall
         {
-            // Handle game over logic
-           // FindObjectOfType<GameManager>().scoreText.text = "GameOver" ;
-
-
+            GameManager.Instance.BallDestroyed();
         }
     }
 
@@ -104,8 +97,7 @@ public class BallHandler : MonoBehaviour
         // Destroy the brick
         Destroy(brick);
 
-        // Update the score
-      //  FindObjectOfType<GameManager>().AddScore(10);
+       
     }
 
 

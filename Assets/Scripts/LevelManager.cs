@@ -1,23 +1,34 @@
 using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
-    public TextAsset levelFile; // Drag and drop the JSON file in the Unity Inspector
-    public GameObject[] brickPrefabs; // Assign brick prefabs for each type in the Inspector
-    public Vector2 gridOffset = new Vector2(-7.5f, 3.5f); // Top-left corner for the grid
-    public Vector2 brickSize = new Vector2(1.5f, 0.7f); // Size of each brick with spacing
-    private int currentLevelIndex = 0; // Start with the first level
+
+    [Space]
+    [SerializeField] TextAsset levelFile; 
+    [SerializeField] GameObject[] brickPrefabs; 
+
+    [Space]
+    [SerializeField] Vector2 gridOffset = new Vector2(-7.5f, 3.5f); // Top-left corner for the grid
+    [SerializeField] Vector2 brickSize = new Vector2(1.5f, 0.7f); // Size of each brick with spacing
+
+    [Space]
+    [SerializeField] GameObject levelCompletePanel;
+    [SerializeField] Button nextLvlBtn;
+
+    public int currentLevelIndex = 0; 
     private LevelData levelData;
+    private int remainingBricks;
 
     void Start()
     {
-        LoadLevelData();
-        GenerateLevel(currentLevelIndex);
+        nextLvlBtn.onClick.AddListener(OnNextButtonClick);
+        
     }
 
-    void LoadLevelData()
+    public void LoadLevelData()
     {
         if (levelFile != null)
         {
@@ -79,13 +90,15 @@ public class LevelManager : MonoBehaviour
 
                     // Instantiate the brick at the calculated position
                     Instantiate(brickPrefabs[brickType - 1], position, Quaternion.identity);
+
+                    remainingBricks++;
                 }
             }
         }
     }
 
 
-    void ClearExistingBricks()
+    public void ClearExistingBricks()
     {
         foreach (GameObject brick in GameObject.FindGameObjectsWithTag("Brick"))
         {
@@ -93,8 +106,34 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+
+    public void OnBrickDestroyed()
+    {
+        remainingBricks--;
+
+        if (remainingBricks <= 0)
+        {
+            Debug.Log("Level Complete!");
+            GameManager.Instance.ResetBall();
+            Time.timeScale = 0f;
+            ShowLevelCompleteUI();
+        }
+    }
+
+    void ShowLevelCompleteUI()
+    {
+        if (levelCompletePanel != null)
+        {
+            levelCompletePanel.SetActive(true);
+            LoadNextLevel();
+        }
+    }
+
+
+
     public void LoadNextLevel()
     {
+
         currentLevelIndex++;
         if (currentLevelIndex < levelData.levels.Length)
         {
@@ -102,8 +141,22 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("No more levels! Game Over or restart.");
+            currentLevelIndex = 0;
+            GenerateLevel(currentLevelIndex);
         }
+
+    }
+
+    void OnNextButtonClick()
+    {
+        levelCompletePanel.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+
+    public int GetTotalLevels()
+    {
+        return levelData.levels.Length;
     }
 }
 
